@@ -5,13 +5,17 @@ $game_stats = {
   :bedroom_visits => 0,
   :basement_visits => 0,
   :garage_visits => 0,
-  :total_room_visits => 0
+  :total_room_visits => 0,
+  :has_item => "empty"
 }
 
 def get_item(item, choice)
-  if choice == 1
+  if $game_stats[:has_item] != "empty" && choice == 1
+    puts "You pick up the #{item} and put down the #{$game_stats[:has_item]}."
     $game_stats[:has_item] = "#{item}"
+  elsif choice == 1
     puts "Great. We now have a #{item}."
+    $game_stats[:has_item] = "#{item}"
   else
     puts "Cool, yeah what would we do with a dumb old #{item} anyway?"
   end
@@ -23,11 +27,11 @@ def spider_faceoff
 #if/else go to another room for new/different item
 
   if $game_stats[:objective] == 1 && $game_stats[:has_item] == "cup"
-    puts "WIN! You trap the spider with the cup."
+    puts "Using the CUP you found, you gently corral the disoriented spider. As you carry it outside to set it free, your eyes briefly make contact with 3 or 4 of the spider's. In that moment, you make a true connection with this often-maligned - yet largely misunderstood - scared, vulnerable little creatre. You think, 'Heck, it's just as afraid as I am. Aren't we all looking for the same thing in this topsy-turvy ride called life? Peace, love and understanding. Yeah.' Your thought trails off as you find yourself standing at the edge of the backyard, at the precipice of a tearful goodbye with your newfound friend. Inhaling deeply, you release the spider and hold in the swelling of emotion until you can run inside lock yourself in the bedroom, where you cry a whole bunch of tears. The next day you're an emotional wreck. For weeks you are heartbroken, but with the help of concerned friends and family members, you're finally able to put the loss of the only creature that's ever truly KNEW you aside. So it comes as quite a shock several months later when you open your back door and find your spider friend on the stoop, waiting to greet you. The joy you feel in that moment instantly makes all the pain you've experienced melt away. Reaching down, you extend a hand for your dearest of all friends to climb upon. You turn and head back into the house. Together. You convert the #{$game_stats[:spider_location]}, the place where the two of you first met, into a web-strewn spider nest. You come up with a name for your new housemate, and it's perfect: #{$game_stats[:name]} Junior. EVERYTHING is perfect. The days take on a beautiful rhythm, living, laughing and loving together in times of struggle and sharing tender moments that you'll never forget. Then one morning, you open the door to the #{$game_stats[:spider_location]} to find your dearest friend looking slightly shriveled. #{$game_stats[:name]} Jr. is dying! Fighting back the tears, you say goodbye, one last time. Devastated though you are, you know the time you two had together was a gift. You take comfort in knowing there are no regrets. After posting your thoughts and feelings on social media, mainstream news sites start to pick up your story. People all over the world are moved by your experiences, vowing to treat the arachnids with whom we share this planet with a greater sense of tolerance and openness. A new age begins as human and spider species begin to overlap, merge and finally evolve into a higher form of life. War and poverty are eliminated. The world is saved, and it's all because of you and #{$game_stats[:name]} Junior. Congrats!"
   elsif $game_stats[:objective] == 1 && $game_stats[:has_item] == "jar"
     puts "WIN! You trap the spider with the jar."
   elsif $game_stats[:objective] == 1 && $game_stats[:has_item] == "shovel"
-    puts "LOSE! The shovel is no good for catching!"
+    puts "You stand aghast"
   elsif $game_stats[:objective] == 1 && $game_stats[:has_item] == "book"
     puts "LOSE! Your book is no good for catching!"
   elsif $game_stats[:objective] == 1 && $game_stats[:has_item] == "blanket"
@@ -69,7 +73,7 @@ end
 def living_room
   $game_stats[:living_room_visits] += 1
   $game_stats[:total_room_visits] += 1
-  $game_stats[:current_room] = 1
+  $game_stats[:current_room] = "living room"
   puts "
     Sure, let's go to the living room...
     "
@@ -86,11 +90,12 @@ def living_room
       sleep 1
       puts "
       Do you want to pick up the blanket? Enter 1 for YES or 2 for NO."
-      choice = gets.chomp.to_i
-      response_filter("blanket", choice, [1, 2], "
+      $game_stats[:take_item] = gets.chomp.to_i
+      response_filter("take_item", $game_stats[:take_item], [1, 2], "
       Enter 1 for YES, I want the BLANKET, or 2 for NO, I DO NOT want the dang BLANKET!
       ")
-      get_item("blanket", choice)
+
+      get_item("blanket", $game_stats[:take_item])
     else
     end
   else
@@ -98,13 +103,14 @@ def living_room
     You also notice a neatly-folded blanket hanging over the back of one chair. Should we take it?"
     sleep 1
     puts "Enter 1 to take the blanket, or 2 to leave it here."
-    choice = gets.chomp.to_i
-    response_filter("blanket", choice, [1, 2], "
+    $game_stats[:take_item] = gets.chomp.to_i
+    response_filter("take_item", $game_stats[:take_item], [1, 2], "
     Enter 1 for YES, I want the BLANKET, or 2 for NO, I DO NOT want the dang BLANKET!
     ")
-    get_item("blanket",choice)
+    get_item("blanket", $game_stats[:take_item])
   end
   sleep 2
+
   puts "Well, I think we've seen enough of the living room. Where should we go next?"
   sleep 1
   puts "
@@ -115,9 +121,9 @@ def living_room
   Enter 6 to go to the GARAGE.
   "
 
-  choice = gets.chomp.to_i
+  $game_stats[:room] = gets.chomp.to_i
 
-  response_filter("room", choice, [2, 3, 4, 5, 6], "
+  response_filter("room", $game_stats[:room], [2, 3, 4, 5, 6], "
   Enter 2 to go to the KITCHEN.
   Enter 3 to go to the BATHROOM.
   Enter 4 to go to the BEDROOM.
@@ -125,14 +131,14 @@ def living_room
   Enter 6 to go to the GARAGE.
     ")
 
-  room_sender(choice)
+  room_sender($game_stats[:room])
 end
 
 def kitchen
 
   $game_stats[:kitchen_visits] += 1
   $game_stats[:total_room_visits] += 1
-  $game_stats[:current_room] = 2
+  $game_stats[:current_room] = "kitchen"
   puts "
     Sure, let's go to the kitchen...
     "
@@ -145,22 +151,22 @@ def kitchen
     if $game_stats[:has_item] != "cup"
       puts "That CUP is still over on the table...
       Do you want to pick up the cup? Enter 1 for YES or 2 for NO."
-      choice = gets.chomp.to_i
-      response_filter("cup", choice, [1, 2], "
+      $game_stats[:take_item] = gets.chomp.to_i
+      response_filter("take_item", $game_stats[:take_item], [1, 2], "
       Enter 1 for YES, I want the CUP, or 2 for NO, I DO NOT want the dang CUP!
       ")
-      get_item("cup", choice)
+      get_item("cup", $game_stats[:take_item])
     else
     end
   else
     puts "You step into the kitchen and look around. No spider in sight, so you mosey on over to the fridge and grab yourself a Go-Gurt.
     It's then that you notice an empty CUP on the kitchen table. It might come in handy ...should we take it with us?"
     puts "Enter 1 to take the cup, or 2 to leave it here."
-    choice = gets.chomp.to_i
-    response_filter("cup", choice, [1, 2], "
+    $game_stats[:take_item] = gets.chomp.to_i
+    response_filter("take_item", $game_stats[:take_item], [1, 2], "
     Enter 1 for YES, I want the CUP, or 2 for NO, I DO NOT want the dang CUP!
     ")
-    get_item("cup",choice)
+    get_item("cup", $game_stats[:take_item])
   end
 
   puts "Well, I think we've seen enough of this room. Where should we go next?"
@@ -172,9 +178,9 @@ def kitchen
   Enter 6 to go to the GARAGE.
   "
 
-  choice = gets.chomp.to_i
+  $game_stats[:room] = gets.chomp.to_i
 
-  response_filter("room", choice, [1, 3, 4, 5, 6], "
+  response_filter("room", $game_stats[:room], [1, 3, 4, 5, 6], "
   Enter 1 to go to the LIVING ROOM.
   Enter 3 to go to the BATHROOM.
   Enter 4 to go to the BEDROOM.
@@ -182,14 +188,14 @@ def kitchen
   Enter 6 to go to the GARAGE.
   ")
 
-  room_sender(choice)
+  room_sender($game_stats[:room])
 end
 
 def bathroom
 
   $game_stats[:bathroom_visits] += 1
   $game_stats[:total_room_visits] += 1
-  $game_stats[:current_room] = 3
+  $game_stats[:current_room] = "bathroom"
   puts "
     Let's investigate the bathroom...
     "
@@ -202,22 +208,22 @@ def bathroom
     if $game_stats[:has_item] != "jar"
       puts "That JAR is still on the counter.
       Do you want to pick up the jar? Enter 1 for YES or 2 for NO."
-      choice = gets.chomp.to_i
-      response_filter("jar", choice, [1, 2], "
+      $game_stats[:take_item] = gets.chomp.to_i
+      response_filter("take_item", $game_stats[:take_item], [1, 2], "
       Enter 1 for YES, I want the JAR, or 2 for NO, I DO NOT want the dang JAR!
       ")
-      get_item("jar", choice)
+      get_item("jar", $game_stats[:take_item])
     else
     end
   else
     puts "The first thing you notice about the water closet is every wall is covered by pictures of cocker spaniel dogs: paintings, photos, cross-stitch art, and a special shrine for Arthur, the famous pet of none other than Sir Elton John.
     You also notice a cluster of cotton balls being kept tastefully in a pink glass JAR. It could be useful later ...should we bring it?"
     puts "Enter 1 to take the jar, or 2 to leave it here."
-    choice = gets.chomp.to_i
-    response_filter("jar", choice, [1, 2], "
+    $game_stats[:take_item] = gets.chomp.to_i
+    response_filter("take_item", $game_stats[:take_item], [1, 2], "
     Enter 1 for YES, I want the JAR, or 2 for NO, I DO NOT want the dang JAR!!!!!
     ")
-    get_item("jar",choice)
+    get_item("jar", $game_stats[:take_item])
   end
 
   puts "Well, it's a little crowded in here. Can we please go somewhere else?"
@@ -229,9 +235,9 @@ def bathroom
   Enter 6 to go to the GARAGE.
   "
 
-  choice = gets.chomp.to_i
+  $game_stats[:room] = gets.chomp.to_i
 
-  response_filter("room", choice, [1, 2, 4, 5, 6], "
+  response_filter("room", $game_stats[:room], [1, 2, 4, 5, 6], "
   Enter 1 to go to the LIVING ROOM.
   Enter 2 to go to the KITCHEN.
   Enter 4 to go to the BEDROOM.
@@ -239,14 +245,14 @@ def bathroom
   Enter 6 to go to the GARAGE.
   ")
 
-  room_sender(choice)
+  room_sender($game_stats[:room])
 end
 
 def bedroom
 
   $game_stats[:bedroom_visits] += 1
   $game_stats[:total_room_visits] += 1
-  $game_stats[:current_room] = 4
+  $game_stats[:current_room] = "bedroom"
   puts "
     Ok, we can go to the bedroom ...but don't get any ideas!
     "
@@ -259,11 +265,11 @@ def bedroom
     if $game_stats[:has_item] != "raincoat"
       puts "That RAINCOAT is still hanging in the closet.
       Do you want to put on the RAINCOAT? Enter 1 for YES or 2 for NO."
-      choice = gets.chomp.to_i
-      response_filter("raincoat", choice, [1, 2], "
+      $game_stats[:take_item] = gets.chomp.to_i
+      response_filter("take_item", $game_stats[:take_item], [1, 2], "
       Enter 1 for YES, I want the RAINCOAT, or 2 for NO, I DO NOT want the dang RAINCOAT!
       ")
-      get_item("raincoat", choice)
+      get_item("raincoat", $game_stats[:take_item])
     else
     end
   else
@@ -273,11 +279,11 @@ def bedroom
     "
 
     puts "Enter 1 to take the raincoat, or 2 to leave it here."
-    choice = gets.chomp.to_i
-    response_filter("raincoat", choice, [1, 2], "
+    $game_stats[:take_item] = gets.chomp.to_i
+    response_filter("take_item", $game_stats[:take_item], [1, 2], "
     Enter 1 for YES, I want the RAINCOAT, or 2 for NO, I DO NOT want the dang RAINCOAT!!!!!
     ")
-    get_item("raincoat",choice)
+    get_item("raincoat", $game_stats[:take_item])
   end
 
   puts "Well, to be honest I feel a little awkward just sitting with you here in the bedroom. No offense.
@@ -290,9 +296,9 @@ def bedroom
   Enter 6 to go to the GARAGE.
   "
 
-  choice = gets.chomp.to_i
+  $game_stats[:room] = gets.chomp.to_i
 
-  response_filter("room", choice, [1, 2, 3, 5, 6], "
+  response_filter("room", $game_stats[:room], [1, 2, 3, 5, 6], "
   Enter 1 to go to the LIVING ROOM.
   Enter 2 to go to the KITCHEN.
   Enter 3 to go to the BATHROOM.
@@ -300,14 +306,14 @@ def bedroom
   Enter 6 to go to the GARAGE.
   ")
 
-  room_sender(choice)
+  room_sender($game_stats[:room])
 end
 
 def basement
 
     $game_stats[:basement_visits] += 1
     $game_stats[:total_room_visits] += 1
-    $game_stats[:current_room] = 5
+    $game_stats[:current_room] = "basement"
     puts "
       We can check out the basement, I just hope it's not too creepy down there!
       "
@@ -320,11 +326,11 @@ def basement
       if $game_stats[:has_item] != "book"
         puts "That BOOK is still over there on the shelf.
         Did you want to grab that? Enter 1 for YES or 2 for NO."
-        choice = gets.chomp.to_i
-        response_filter("book", choice, [1, 2], "
+        $game_stats[:take_item] = gets.chomp.to_i
+        response_filter("take_item", $game_stats[:take_item], [1, 2], "
         Enter 1 for YES, I want the BOOK, or 2 for NO, I DO NOT want the dang BOOK!!!!!!!!
         ")
-        get_item("book", choice)
+        get_item("book", $game_stats[:take_item])
       else
       end
     else
@@ -334,11 +340,11 @@ def basement
       "
 
       puts "Enter 1 to take the book, or 2 to leave it here."
-      choice = gets.chomp.to_i
-      response_filter("book", choice, [1, 2], "
+      $game_stats[:take_item] = gets.chomp.to_i
+      response_filter("take_item", $game_stats[:take_item], [1, 2], "
       Enter 1 for YES, I want the BOOK, or 2 for NO, I DO NOT want the dang BOOK!!!!!
       ")
-      get_item("book",choice)
+      get_item("book", $game_stats[:take_item])
     end
 
     puts "So that's the basement. Where should we go next?"
@@ -350,9 +356,9 @@ def basement
     Enter 6 to go to the GARAGE.
     "
 
-    choice = gets.chomp.to_i
+    $game_stats[:room] = gets.chomp.to_i
 
-    response_filter("room", choice, [1, 2, 3, 4, 6], "
+    response_filter("room", $game_stats[:room], [1, 2, 3, 4, 6], "
     Enter 1 to go to the LIVING ROOM.
     Enter 2 to go to the KITCHEN.
     Enter 3 to go to the BATHROOM.
@@ -360,14 +366,14 @@ def basement
     Enter 6 to go to the GARAGE.
     ")
 
-    room_sender(choice)
+    room_sender($game_stats[:room])
 end
 
 def garage
 
       $game_stats[:garage_visits] += 1
       $game_stats[:total_room_visits] += 1
-      $game_stats[:current_room] = 6
+      $game_stats[:current_room] = "garage"
       puts "
         To the garage we go!
         "
@@ -380,11 +386,11 @@ def garage
         if $game_stats[:has_item] != "shovel"
           puts "There's that SHOVEL. Is that what we came for?
           Enter 1 to GRAB the shovel, or 2 to LEAVE IT HERE."
-          choice = gets.chomp.to_i
-          response_filter("shovel", choice, [1, 2], "
+          $game_stats[:take_item] = gets.chomp.to_i
+          response_filter("take_item", $game_stats[:take_item], [1, 2], "
           Enter 1 for YES, I want the SHOVEL, or 2 for NO, I DO NOT WANT THE DANG SHOVEL!!!!!!!!
           ")
-          get_item("shovel", choice)
+          get_item("shovel", $game_stats[:take_item])
         else
         end
       else
@@ -394,11 +400,11 @@ def garage
         "
 
         puts "Enter 1 to take the shovel, or 2 to leave it here."
-        choice = gets.chomp.to_i
-        response_filter("shovel", choice, [1, 2], "
+        $game_stats[:take_item] = gets.chomp.to_i
+        response_filter("take_item", $game_stats[:take_item], [1, 2], "
         Enter 1 for YES, I want the SHOVEL, or 2 for NO, I DO NOT want the dang SHOVEL!!!!!
         ")
-        get_item("shovel",choice)
+        get_item("shovel", $game_stats[:take_item])
       end
 
       puts "Can we leave the garage now? I'm cold. Where should we go?"
@@ -410,9 +416,9 @@ def garage
       Enter 5 to go to the BASEMENT.
       "
 
-      choice = gets.chomp.to_i
+      $game_stats[:room] = gets.chomp.to_i
 
-      response_filter("room", choice, [1, 2, 3, 4, 5], "
+      response_filter("room", $game_stats[:room], [1, 2, 3, 4, 5], "
       Enter 1 to go to the LIVING ROOM.
       Enter 2 to go to the KITCHEN.
       Enter 3 to go to the BATHROOM.
@@ -420,7 +426,7 @@ def garage
       Enter 5 to go to the BASEMENT.
       ")
 
-      room_sender(choice)
+      room_sender($game_stats[:room])
 end
 
 def name_num(name)
@@ -461,22 +467,20 @@ end
 
 def spider_locator
   if $game_stats[:threemainder] == 0 && $game_stats[:over5] == false
-    $game_stats[:spider_location] = 1
+    $game_stats[:spider_location] = "living room"
   elsif $game_stats[:threemainder] == 0 && $game_stats[:over5] == true
-      $game_stats[:spider_location] = 2
+      $game_stats[:spider_location] = "kitchen"
   elsif $game_stats[:threemainder] == 1 && $game_stats[:over5] == false
-      $game_stats[:spider_location] = 3
+      $game_stats[:spider_location] = "bathroom"
   elsif $game_stats[:threemainder] == 1 && $game_stats[:over5] == true
-      $game_stats[:spider_location] = 4
+      $game_stats[:spider_location] = "bedroom"
   elsif $game_stats[:threemainder] == 2 && $game_stats[:over5] == false
-      $game_stats[:spider_location] = 5
+      $game_stats[:spider_location] = "basement"
   elsif $game_stats[:threemainder] == 2 && $game_stats[:over5] == true
-      $game_stats[:spider_location] = 6
+      $game_stats[:spider_location] = "garage"
   else
-    $game_stats[:spider_location] = 6
+    $game_stats[:spider_location] = "garage"
   end
-
-  #puts "The spider is in the #{$game_stats[:spider_location]}."
 end
 
 def room_sender(room_num)
@@ -496,9 +500,13 @@ def room_sender(room_num)
   sleep 1
 end
 
-################### INTRO ####################
+################### GAME START ####################
 puts "
-HOLY CRAP! There's a SPIDER in the house!!!!! :0 :("
+HOLY CRAP! There's a SPIDER in the house!!!!!"
+sleep 1
+puts " :0"
+sleep 0.5
+puts " :("
 sleep 2
 puts "
 What should we do?"
@@ -512,9 +520,9 @@ Enter 3 if we should AVOID it at all costs.
 choice = gets.chomp.to_i
 
 response_filter("objective", choice, [1, 2, 3], "
-Enter 1 if we should try to catch it.
-Enter 2 if we should kill it.
-Enter 3 if we should avoid it at all costs.
+Enter 1 if we should CATCH it.
+Enter 2 if we should KILL it.
+Enter 3 if we should AVOID it.
   ")
 sleep 1
 puts "
@@ -533,7 +541,7 @@ sleep 1
 puts "
 So where in the house should we go?
 "
-sleep 0.5
+sleep 1.5
 puts "
 Enter 1 to go to the LIVING ROOM.
 Enter 2 to go to the KITCHEN.
@@ -543,9 +551,10 @@ Enter 5 to go to the BASEMENT.
 Enter 6 to go to the GARAGE.
 "
 
-choice = gets.chomp.to_i
+#choice = gets.chomp.to_i
+$game_stats[:room] = gets.chomp.to_i
 
-response_filter("room", choice, [1, 2, 3, 4, 5, 6], "
+response_filter("room", $game_stats[:room], [1, 2, 3, 4, 5, 6], "
 Enter 1 to go to the LIVING ROOM.
 Enter 2 to go to the KITCHEN.
 Enter 3 to go to the BATHROOM.
@@ -554,4 +563,4 @@ Enter 5 to go to the BASEMENT.
 Enter 6 to go to the GARAGE.
   ")
 
-room_sender(choice)
+room_sender($game_stats[:room])
